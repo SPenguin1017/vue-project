@@ -88,7 +88,7 @@ export default {
       formData.append('file', this.sFile);
 
       try {
-        const response = await axios.post('http://localhost:8080/api/status', formData ,{
+        const response = await axios.post('http://localhost:8070/api/status', formData ,{
           headers: {
             'Content-Type': 'multipart/form-data'
           }
