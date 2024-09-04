@@ -1,27 +1,74 @@
-  @import './base.css';
+    @import './base.css';
 
-  #app {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem;
-    font-weight: normal;
-    font-family: '微軟正黑體';
-    display: grid;
-    align-items: center;
-  }
-
-  a,
-  .green {
-    text-decoration: none;
-    color: hsla(160, 100%, 37%, 1);
-    transition: 0.4s;
-    padding: 3px;
-  }
-
-  @media (hover: hover) {
-    a:hover {
-      background-color: hsla(160, 100%, 37%, 0.2);
+    #app {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem;
+      font-weight: normal;
+      font-family: '微軟正黑體';
+      display: grid;
+      align-items: center;
     }
-  }
 
- 
+    a,
+    .green {
+      text-decoration: none;
+      color: hsla(160, 100%, 37%, 1);
+      transition: 0.4s;
+      padding: 3px;
+    }
+
+    @media (hover: hover) {
+      a:hover {
+        background-color: hsla(160, 100%, 37%, 0.2);
+      } 
+    }
+
+    body {
+      background-image: url('./src/assets/service.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+    
+    @media (max-width: 768px) {
+      #app {
+        padding: 1rem;
+        grid-template-columns: 1fr;
+      }
+      
+      .login-box {
+        width: 90%;
+        padding: 20px;
+      }
+
+      .container {
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: 400px;
+        max-width: 400px;
+      }
+    }
+
+    @media (max-width: 1140px) {
+      #app {
+        padding: 1rem;
+        grid-template-columns: 1fr;
+      }
+      
+      .login-box {
+        width: 90%;
+        padding: 20px;
+      }
+
+      .container {
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: 400px;
+        max-width: 400px;
+      }
+    }
+    

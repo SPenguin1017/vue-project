@@ -1,42 +1,43 @@
 <template>
-    <div class = "login-box">
+  <div class="container">
+    <div class="login-box">
       <form @submit.prevent="submitForm">
         <div class="user-box">
-          <input type="text" id="databaseHost" v-model="textInput[0].value" required=""/>
-          <label>資料庫Host</label>
+          <input type="text" id="databaseHost" v-model="inputValue" @input="splitHostPort" required />
+          <label>資料庫Host : Port</label>
         </div>
         <div class="user-box">
-          <input type="text" id="databaseName" v-model="textInput[1].value" required=""/>
+          <input type="text" id="databaseName" v-model="textInput[1].value" required="" />
           <label>資料庫名稱</label>
         </div>
         <div class="user-box">
-          <input type="text" id="username" v-model="textInput[2].value" required=""/>
+          <input type="text" id="username" v-model="textInput[2].value" required="" />
           <label>使用者帳號</label>
-        </div>  
+        </div>
         <div class="user-box">
-          <input type="password" id="password" v-model="textInput[3].value" required=""/>
+          <input type="password" id="password" v-model="textInput[3].value" required="" />
           <label>使用者密碼</label>
         </div>
         <div class="user-box">
-          <input type="text" id="tableName" v-model="textInput[4].value" required=""/>
+          <input type="text" id="tableName" v-model="textInput[4].value" required="" />
           <label>Table名稱</label>
         </div>
         <div class="user-box">
-          <input type="text" id="maxLenField" v-model="textInput[5].value" required=""/>
+          <input type="text" id="maxLenField" v-model="textInput[5].value" required="" />
           <label>Max_Len</label>
         </div>
         <div class="user-box">
-          <input type="text" id="mail" v-model="textInput[6].value" required=""/>
+          <input type="text" id="mail" v-model="textInput[6].value" required="" />
           <label>通知信箱</label>
         </div>
         <div class="user-box">
-          <input type="file" accept=".xlsx" @change="handleFileChange"/>
+          <input type="file" accept=".xlsx" @change="handleFileChange" />
         </div>
         <div>
-          <div class = "form-row">
+          <div class="form-row">
             <div>
               <label>資料庫類型</label>
-              <select v-model="textInput[7].value" style="margin-right: 30px" >
+              <select v-model="textInput[7].value" style="margin-right: 30px">
                 <option v-for="option in options" :key="option.value" :value="option.value">
                   {{ option.label }}
                 </option>
@@ -51,11 +52,12 @@
             </div>
           </div>
         </div>
-        <div> 
+        <div>
           <button @click="summit">提交<span></span></button>
         </div>
       </form>
     </div>
+  </div>
 </template>
 
 <script>
@@ -69,21 +71,20 @@ export default {
     return {
       selectedFile: null,
       textInput: [
-        { value: '', label: '資料庫Host' },
-        { value: '', label: '資料庫名稱' },
-        { value: '', label: '使用者帳號' },
-        { value: '', label: '使用者密碼' },
-        { value: '', label: 'table名稱' },
-        { value: '', label: 'max_len的欄位名稱' },
-        { value: '', label: '通知信箱' },
-        { value: '', label: '資料庫類型' },
-        { value: 'N', label: '是否truncate' }
+        { value: '10.15.24.31', label: 'db_host' },
+        { value: 'demo', label: 'db_name' },
+        { value: 'chainsea', label: 'db_user' },
+        { value: 'chainsea', label: 'db_password' },
+        { value: 'test', label: 'table_name' },
+        { value: 'note,remark,answer,img_url,external_url', label: 'max_len' },
+        { value: 'Josh.Huang@chainsea.com.tw', label: 'email' },
+        { value: 'sqlserver', label: 'db_type' },
+        { value: 'N', label: 'truncate' },
+        { value: '1433', label: 'db_port' }
       ],
       options: [
-        { value: 'ORACLE', label: 'ORACLE' },
-        { value: 'MYSQL', label: 'MYSQL' },
-        { value: 'MSSQL', label: 'MSSQL' },
-        { value: 'MONGO', label: 'MONGO' }
+        { value: 'sqlserver', label: 'SQLserver' },
+        { value: 'mariadb', label: 'Mariadb' }
       ]
     };
   },
@@ -94,42 +95,54 @@ export default {
       this.selectedFile = event.target.files[0];
     },
 
+    // eslint-disable-next-line no-unused-vars
     async summit(event) {
 
       if (!this.selectedFile) {
-          alert('請先選擇一個文件');
-          return;
-        }
+        alert('請先選擇一個文件');
+        return;
+      }
 
-        for (let input of this.textInput) {
+      for (let input of this.textInput) {
         if (input.label !== '是否truncate' && !input.value) {
           alert(`請填寫${input.label}`);
           return false;
         }
       }
-            
-      const payload = this.textInput.reduce((acc, item) => {
-        acc[item.label] = item.value;
-        return acc;
-      }, {});
 
+      const fields = [
+        'db_host', 'db_name', 'db_user', 'db_password',
+        'table_name', 'max_len', 'email', 'db_type',
+        'truncate', 'db_port'
+      ];
       const formData = new FormData();
-      formData.append('metadata', JSON.stringify(payload));
+
+      fields.forEach((field, index) => {
+        formData.append(field, this.textInput[index].value);
+      });
+
       formData.append('file', this.selectedFile);
 
       try {
-        const response = await axios.post('http://localhost:8070/api/submit', formData, {
+        const response = await axios.post('http://10.15.24.41:9657/submit', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
+
         console.log('Success:', response.data);
       } catch (error) {
         console.error('Error:', error);
       }
-      this.$router.push({ 
-        name: 'SecondPage', query: {databaseName : this.textInput[1].value, file:this.selectedFile.name, tableName :this.textInput[4].value}
-      }); 
+      this.$router.push({
+        name: 'SecondPage', query: { databaseName: this.textInput[1].value, tableName: this.textInput[4].value }
+      });
+    },
+
+    splitHostPort() {
+      const [host, port] = this.inputValue.split(':');
+      this.textInput[0].value = host || '';
+      this.textInput[9].value = port || '';
     }
 
   }
@@ -138,8 +151,7 @@ export default {
 </script>
 
 <style scoped>
-
-button{
+button {
   border: none;
   background-color: rgba(24, 20, 20, 0.987);
 }
@@ -153,7 +165,7 @@ button{
   transform: translate(-50%, -50%);
   background: rgba(24, 20, 20, 0.987);
   box-sizing: border-box;
-  box-shadow: 0 15px 25px rgba(0,0,0,.6);
+  box-shadow: 0 15px 25px rgba(0, 0, 0, .6);
   border-radius: 10px;
 }
 
@@ -184,8 +196,8 @@ button{
   transition: .5s;
 }
 
-.login-box .user-box input:focus ~ label,
-.login-box .user-box input:valid ~ label {
+.login-box .user-box input:focus~label,
+.login-box .user-box input:valid~label {
   top: -20px;
   left: 0;
   color: #bdb8b8;
@@ -211,9 +223,9 @@ button{
   background: #013d8b;
   color: #fff;
   box-shadow: 0 0 5px #013d8b,
-              0 0 25px #013d8b,
-              0 0 50px #013d8b,
-              0 0 100px #013d8b;
+    0 0 25px #013d8b,
+    0 0 50px #013d8b,
+    0 0 100px #013d8b;
 }
 
 .login-box button span {
@@ -226,7 +238,8 @@ button{
     left: -100%;
   }
 
-  50%,100% {
+  50%,
+  100% {
     left: 100%;
   }
 }
@@ -261,11 +274,9 @@ button{
 }
 
 .checkbox-wrapper-4 .cbx:hover {
-  background: linear-gradient(
-    90deg,
-    rgb(2, 127, 230) 0%,
-    rgba(126, 28, 145, 1) 100%
-  );
+  background: linear-gradient(90deg,
+      rgb(2, 127, 230) 0%,
+      rgba(126, 28, 145, 1) 100%);
 }
 
 .cbx:not(:hover) span svg {
@@ -320,7 +331,7 @@ button{
   visibility: hidden;
 }
 
-.checkbox-wrapper-4 .inp-cbx:checked + .cbx span:first-child {
+.checkbox-wrapper-4 .inp-cbx:checked+.cbx span:first-child {
   background: #fff;
   border-color: #fff;
   transition: rotate 2s;
@@ -328,20 +339,16 @@ button{
   animation: wave-4 0.6s ease;
 }
 
-.checkbox-wrapper-4 .inp-cbx:checked + .cbx:not(:hover) span:first-child {
-  background: linear-gradient(
-    90deg,
-    rgb(2, 127, 230) 0%,
-    rgba(126, 28, 145, 1) 100%
-  );
-  border-color: linear-gradient(
-    90deg,
-    rgb(2, 127, 230) 0%,
-    rgba(126, 28, 145, 1) 100%
-  );
+.checkbox-wrapper-4 .inp-cbx:checked+.cbx:not(:hover) span:first-child {
+  background: linear-gradient(90deg,
+      rgb(2, 127, 230) 0%,
+      rgba(126, 28, 145, 1) 100%);
+  border-color: linear-gradient(90deg,
+      rgb(2, 127, 230) 0%,
+      rgba(126, 28, 145, 1) 100%);
 }
 
-.checkbox-wrapper-4 .inp-cbx:checked + .cbx span:first-child svg {
+.checkbox-wrapper-4 .inp-cbx:checked+.cbx span:first-child svg {
   stroke-dashoffset: 0;
 }
 
@@ -364,6 +371,7 @@ button{
   33% {
     transform: scale(1.3);
   }
+
   66% {
     transform: scale(0.8);
   }
@@ -373,6 +381,7 @@ button{
   33% {
     transform: scale(1.3);
   }
+
   66% {
     transform: scale(0.8);
   }
@@ -382,6 +391,7 @@ button{
   33% {
     transform: scale(1.3);
   }
+
   66% {
     transform: scale(0.8);
   }
@@ -391,6 +401,7 @@ button{
   33% {
     transform: scale(1.3);
   }
+
   66% {
     transform: scale(0.8);
   }
@@ -401,11 +412,10 @@ button{
   align-items: center;
   gap: 20px;
   font-size: 18px;
-  color:#fff;
+  color: #fff;
 }
 
 .form-row label {
   margin-right: 10px;
 }
-
 </style>
